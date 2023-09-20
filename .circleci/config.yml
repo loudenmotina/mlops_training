@@ -1,0 +1,45 @@
+version: 2.1
+jobs:
+  staging_deployment:
+  docker:
+   - image: circleci/python:3.8
+  working_directory:~/app
+  steps:
+  -checkout
+  - setup_remote_docker:
+   version: 19.03.13
+  - run:
+      name: install Dependencies
+      command:
+         pip install -r requirements.txt
+  - run:
+    name: Run Tests
+    command:
+      pytest tests/test_app.py
+  - run:
+     name: Build Docker image
+     command:
+        docker build -t mlops_demo
+  - run:
+      name: tag Docker image
+      command:
+         docker tag mlops_demo:latest 
+  - run
+     name: Deploy  to staging
+     command:
+       sudo pip install awscli
+       eval $(aws ecr get -login --no-include-email --region us-east-1)
+       aws ecr get-login --no-include-email --region us-east-1
+       docker push 551582586312.dkr.ecr.us-east-1.amazonaws.com/mlops_demo
+workflow:
+   version: 2
+   build-and-deploy:
+   jobs:
+     -staging_deployment:
+      filters:
+       branches:
+         only:
+         -main
+
+
+
