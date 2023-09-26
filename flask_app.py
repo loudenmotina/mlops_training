@@ -8,19 +8,24 @@ logfile("app.log", maxBytes=1e6, backupCount=3)
 import snowflake.connector
 
 # Gets the version
-ctx = snowflake.connector.connect(
+conn = snowflake.connector.connect(
     user='louden',
     password='Besingi1',
-    account='recfctj-jlb68777'
+    account='recfctj-jlb68777',
+    warehouse=config["snowflake_WAREHOUSE"],
+    database=config["snowflake_DATABASE"],
+    schema=config["snowflake_SCHEMA"]
     )
-cs = ctx.cursor()
-try:
-    cs.execute("SELECT current_version()")
-    one_row = cs.fetchone()
-    print(one_row[0])
-finally:
-    cs.close()
-ctx.close()
+
+conn.cursor().execute("USE WAREHOUSE tiny_warehouse_mg")
+conn.cursor().execute("USE DATABASE testdb_mg")
+conn.cursor().execute("USE SCHEMA testdb_mg.testschema_mg")
+conn.cursor().execute(
+    "CREATE OR REPLACE TABLE "
+    "mlops_table(id interger, date string,predictions interger,actual interger)")
+
+cur = conn.cursor()
+cur.execute("select * from SNOWFLAKE_SAMPLE_DATA.TPCH_SF1000.CUSTOMER limit 10")
 # load the model
 model = load(open('model.pkl', 'rb'))
 
