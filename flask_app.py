@@ -35,6 +35,11 @@ logger.info("Flask app started")
 def hello_world():
     return 'Hello, World!'
 
+
+
+
+
+
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
